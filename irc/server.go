@@ -8,6 +8,7 @@ import (
 type Server struct {
 	Name string
 	Port uint16
+	Motd *string
 }
 
 func (server *Server) Start() error {
@@ -26,7 +27,7 @@ func (server *Server) Start() error {
 		client := client{
 			connection: connection,
 			server:     server,
-			username:   nil,
+			nickname:   nil,
 		}
 
 		go client.handle()
