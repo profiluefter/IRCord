@@ -35,7 +35,25 @@ func parseMessage(line string) message {
 
 		parametersIndex := index - lineSplitIndex
 		parameters[parametersIndex] = new(string)
-		*parameters[parametersIndex] = parameter
+
+		if parameter[0] != ':' {
+			*parameters[parametersIndex] = parameter
+		} else {
+			//trailing parameter: everything following this is one parameter
+			var builder strings.Builder
+			builder.WriteString(strings.TrimPrefix(parameter, ":"))
+
+			for inner_index, inner_parameter := range lineSplit {
+				if inner_index <= index {
+					continue
+				}
+				builder.WriteString(" ") //add space from split
+				builder.WriteString(inner_parameter)
+			}
+
+			*parameters[parametersIndex] = builder.String()
+			break
+		}
 	}
 
 	return message{
