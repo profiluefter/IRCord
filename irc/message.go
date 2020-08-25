@@ -21,7 +21,7 @@ func parseMessage(line string) message {
 
 	if line[0] == ':' {
 		prefix = new(string)
-		*prefix = lineSplit[lineSplitIndex]
+		*prefix = strings.TrimPrefix(lineSplit[lineSplitIndex], ":")
 		lineSplitIndex++
 	}
 
@@ -43,12 +43,12 @@ func parseMessage(line string) message {
 			var builder strings.Builder
 			builder.WriteString(strings.TrimPrefix(parameter, ":"))
 
-			for inner_index, inner_parameter := range lineSplit {
-				if inner_index <= index {
+			for innerIndex, innerParameter := range lineSplit {
+				if innerIndex <= index {
 					continue
 				}
 				builder.WriteString(" ") //add space from split
-				builder.WriteString(inner_parameter)
+				builder.WriteString(innerParameter)
 			}
 
 			*parameters[parametersIndex] = builder.String()
