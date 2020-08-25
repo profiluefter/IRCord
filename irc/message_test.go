@@ -5,7 +5,17 @@ import (
 	"testing"
 )
 
-func TestParseMessageWithoutParameters(t *testing.T) {
+func TestParseMessage(t *testing.T) {
+	actual := parseMessage("command")
+	expected := message{
+		command: "command",
+	}
+	if !reflect.DeepEqual(actual, expected) {
+		t.Fail()
+	}
+}
+
+func TestParseMessageWithPrefix(t *testing.T) {
 	actual := parseMessage(":prefix command")
 
 	var expectedPrefix = "prefix"
@@ -19,7 +29,7 @@ func TestParseMessageWithoutParameters(t *testing.T) {
 	}
 }
 
-func TestParseMessage(t *testing.T) {
+func TestParseMessageWithParameters(t *testing.T) {
 	actual := parseMessage("command1234 parameter1 parameter2")
 
 	var (
@@ -59,12 +69,46 @@ func TestParseMessageWithTrailingParameter(t *testing.T) {
 	}
 }
 
-func TestParseMessageWithOnlyCommand(t *testing.T) {
-	actual := parseMessage("command")
-	expected := message{
-		command: "command",
+func TestSerialize(t *testing.T) {
+	actual := message{
+		command: "test",
+	}.serialize()
+
+	expected := "test"
+
+	if actual != expected {
+		t.Fatalf("%s != %s", actual, expected)
 	}
-	if !reflect.DeepEqual(actual, expected) {
-		t.Fail()
+}
+
+func TestSerializeWithPrefix(t *testing.T) {
+	prefix := "testrunner"
+	actual := message{
+		prefix:  &prefix,
+		command: "test",
+	}.serialize()
+
+	expected := ":testrunner test"
+
+	if actual != expected {
+		t.Fatalf("%s != %s", actual, expected)
+	}
+}
+
+func TestSerializeWithParameters(t *testing.T) {
+	firstParameter := "param1"
+	secondParameter := "param2"
+	actual := message{
+		command: "test",
+		parameters: [15]*string{
+			&firstParameter,
+			&secondParameter,
+		},
+	}.serialize()
+
+	expected := "test param1 param2"
+
+	if actual != expected {
+		t.Fatalf("%s != %s", actual, expected)
 	}
 }

@@ -63,19 +63,20 @@ func parseMessage(line string) message {
 	}
 }
 
-func (message *message) serialize() string {
+func (message message) serialize() string {
 	var buffer bytes.Buffer
 
 	if message.prefix != nil {
+		buffer.WriteRune(':')
 		buffer.WriteString(*message.prefix)
-		buffer.WriteByte(' ')
+		buffer.WriteRune(' ')
 	}
 
 	buffer.WriteString(message.command)
 
 	for _, parameter := range message.parameters {
 		if parameter != nil {
-			buffer.WriteByte(' ')
+			buffer.WriteRune(' ')
 			buffer.WriteString(*parameter)
 		} else {
 			break
