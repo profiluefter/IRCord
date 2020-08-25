@@ -26,9 +26,10 @@ func parseMessage(line string) message {
 	}
 
 	command = lineSplit[lineSplitIndex]
+	lineSplitIndex++
 
 	for index, parameter := range lineSplit {
-		if index <= lineSplitIndex {
+		if index < lineSplitIndex {
 			continue
 		}
 
@@ -58,6 +59,8 @@ func (message *message) serialize() string {
 		if parameter != nil {
 			buffer.WriteByte(' ')
 			buffer.WriteString(*parameter)
+		} else {
+			break
 		}
 	}
 
