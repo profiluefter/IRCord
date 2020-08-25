@@ -43,7 +43,21 @@ func (client *client) recvMessage() (message, error) {
 	return message, nil
 }
 
+func (client *client) sendNumeric(numeric reply, reason string) error {
+	var target = client.nickname
+	if target == nil {
+		target = new(string)
+		*target = "*"
+	}
+
+	return client.sendMessage(message{
+		prefix:     &client.server.Name,
+		command:    fmt.Sprintf("%03d", numeric),
+		parameters: [15]*string{target, &reason},
+	})
+}
+
 func (client *client) sendMessage(message message) error {
-	_, err := client.connection.Write([]byte(message.serialize()))
+	_, err := client.connection.Write(append([]byte(message.serialize()), '\r', '\n'))
 	return err
 }
