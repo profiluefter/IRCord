@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 )
@@ -18,7 +19,8 @@ func NewServer(options ServerOptions) *server {
 }
 
 type server struct {
-	options ServerOptions
+	options  ServerOptions
+	channels []*channel
 }
 
 func (server *server) Start() error {
@@ -28,6 +30,7 @@ func (server *server) Start() error {
 	}
 	defer socket.Close()
 
+	fmt.Printf("Now listening on %s\n", socket.Addr().String())
 	for {
 		connection, err := socket.Accept()
 		if err != nil {
@@ -42,4 +45,12 @@ func (server *server) Start() error {
 
 		go client.handle()
 	}
+}
+
+func (server *server) NewChannel(name string) *channel {
+	channel := newChannel(name)
+	go channel.worker()
+
+	server.channels = append(server.channels, channel)
+	return channel
 }

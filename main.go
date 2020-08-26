@@ -15,6 +15,8 @@ func main() {
 	}
 	server := irc.NewServer(options)
 
+	server.NewChannel("#testing")
+
 	err := server.Start()
 	if err != nil {
 		fmt.Println(err)
