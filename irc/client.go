@@ -7,7 +7,8 @@ import (
 	"strings"
 )
 
-const connectionClosedMessage = "An existing connection was forcibly closed by the remote host."
+const connectionClosedByRemote = "An existing connection was forcibly closed by the remote host."
+const connectionClosedByServer = "use of closed network connection"
 
 type client struct {
 	connection net.Conn
@@ -23,7 +24,7 @@ func (client *client) handle() {
 	for {
 		message, recvError := client.recvMessage()
 		if recvError != nil {
-			if !strings.Contains(recvError.Error(), connectionClosedMessage) {
+			if !strings.Contains(recvError.Error(), connectionClosedByRemote) && !strings.Contains(recvError.Error(), connectionClosedByServer) {
 				println(recvError.Error())
 			}
 			return
@@ -77,13 +78,16 @@ func (client *client) handle() {
 			}
 			replyError = client.sendNumeric(ERR_USERSDISABLED, "Users are not implemented")
 			break
+		case "QUIT":
+			client.connection.Close()
+			break
 		default:
 			fmt.Printf("Unknown command: %s\n", message.command)
 			break
 		}
 
 		if replyError != nil {
-			if !strings.Contains(replyError.Error(), connectionClosedMessage) {
+			if !strings.Contains(recvError.Error(), connectionClosedByRemote) && !strings.Contains(recvError.Error(), connectionClosedByServer) {
 				println(replyError.Error())
 			}
 			return
