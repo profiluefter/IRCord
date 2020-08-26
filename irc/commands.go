@@ -17,14 +17,14 @@ var commands = map[string]messageHandler{
 		if c.registered {
 			return c.sendNumeric(ERR_ALREADYREGISTRED, "Already registered")
 		}
-		if m.parameters[0] == nil {
+		if len(m.parameters) < 1 {
 			return c.sendNumeric(ERR_NEEDMOREPARAMS, "No password given")
 		}
 		//currently there is no auth so all passwords are allowed
 		return nil
 	},
 	"NICK": func(c *client, m *message) error {
-		if m.parameters[0] == nil {
+		if len(m.parameters) < 1 {
 			return c.sendNumeric(ERR_NONICKNAMEGIVEN, "No nickname given")
 		}
 		c.nickname = m.parameters[0]
@@ -56,7 +56,7 @@ var commands = map[string]messageHandler{
 		if c.registered {
 			return c.sendNumeric(ERR_ALREADYREGISTRED, "Already registered")
 		}
-		if m.parameters[3] == nil {
+		if len(m.parameters) < 4 {
 			return c.sendNumeric(ERR_NEEDMOREPARAMS, "Not enough parameters")
 		}
 		return c.sendNumeric(ERR_USERSDISABLED, "Users are not implemented")
@@ -66,13 +66,13 @@ var commands = map[string]messageHandler{
 		return nil
 	},
 	"PING": func(c *client, m *message) error {
-		if m.parameters[0] == nil {
+		if len(m.parameters) < 1 {
 			return c.sendNumeric(ERR_NOORIGIN, "Not enough parameters")
 		}
 		var pong = message{
 			prefix:  &c.server.options.Name,
 			command: "PONG",
-			parameters: [15]*string{
+			parameters: []*string{
 				&c.server.options.Name,
 				m.parameters[0],
 			},

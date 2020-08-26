@@ -68,7 +68,7 @@ func (client *client) sendNumeric(numeric reply, reason string) error {
 	return client.sendMessage(message{
 		prefix:     &client.server.options.Name,
 		command:    fmt.Sprintf("%03d", numeric),
-		parameters: [15]*string{target, &reason},
+		parameters: []*string{target, &reason},
 	})
 }
 

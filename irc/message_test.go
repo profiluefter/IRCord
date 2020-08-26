@@ -51,7 +51,7 @@ func TestParseMessageWithParameters(t *testing.T) {
 	)
 	expected := message{
 		command: "command1234",
-		parameters: [15]*string{
+		parameters: []*string{
 			&parameter1,
 			&parameter2,
 		},
@@ -75,7 +75,7 @@ func TestParseMessageWithTrailingParameter(t *testing.T) {
 	)
 	expected := message{
 		command: "command1234",
-		parameters: [15]*string{
+		parameters: []*string{
 			&parameter1,
 			&parameter2,
 		},
@@ -117,7 +117,7 @@ func TestSerializeWithParameters(t *testing.T) {
 	secondParameter := "param2"
 	actual := message{
 		command: "test",
-		parameters: [15]*string{
+		parameters: []*string{
 			&firstParameter,
 			&secondParameter,
 		},

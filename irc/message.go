@@ -9,7 +9,7 @@ import (
 type message struct {
 	prefix     *string
 	command    string
-	parameters [15]*string
+	parameters []*string
 }
 
 func parseMessage(line string) (*message, error) {
@@ -22,7 +22,7 @@ func parseMessage(line string) (*message, error) {
 
 	var prefix *string
 	var command string
-	var parameters [15]*string
+	var parameters []*string
 
 	if line[0] == ':' {
 		prefix = new(string)
@@ -38,11 +38,11 @@ func parseMessage(line string) (*message, error) {
 			continue
 		}
 
-		parametersIndex := index - lineSplitIndex
-		parameters[parametersIndex] = new(string)
+		parameterPointer := new(string)
+		parameters = append(parameters, parameterPointer)
 
 		if parameter[0] != ':' {
-			*parameters[parametersIndex] = parameter
+			*parameterPointer = parameter
 		} else {
 			//trailing parameter: everything following this is one parameter
 			var builder strings.Builder
@@ -56,7 +56,7 @@ func parseMessage(line string) (*message, error) {
 				builder.WriteString(innerParameter)
 			}
 
-			*parameters[parametersIndex] = builder.String()
+			*parameterPointer = builder.String()
 			break
 		}
 	}
@@ -85,6 +85,7 @@ func (message message) serialize() string {
 			buffer.WriteRune(' ')
 			buffer.WriteString(*parameter)
 		} else {
+			//This shouldn't happen anymore but better be save
 			break
 		}
 	}
