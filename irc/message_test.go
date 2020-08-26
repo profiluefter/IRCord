@@ -6,17 +6,26 @@ import (
 )
 
 func TestParseMessage(t *testing.T) {
-	actual := parseMessage("command")
+	actual, err := parseMessage("command")
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
 	expected := message{
 		command: "command",
 	}
-	if !reflect.DeepEqual(actual, expected) {
+	if !reflect.DeepEqual(*actual, expected) {
 		t.Fail()
 	}
 }
 
 func TestParseMessageWithPrefix(t *testing.T) {
-	actual := parseMessage(":prefix command")
+	actual, err := parseMessage(":prefix command")
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
 	var expectedPrefix = "prefix"
 	expected := message{
@@ -24,13 +33,17 @@ func TestParseMessageWithPrefix(t *testing.T) {
 		command: "command",
 	}
 
-	if !reflect.DeepEqual(actual, expected) {
+	if !reflect.DeepEqual(*actual, expected) {
 		t.Fail()
 	}
 }
 
 func TestParseMessageWithParameters(t *testing.T) {
-	actual := parseMessage("command1234 parameter1 parameter2")
+	actual, err := parseMessage("command1234 parameter1 parameter2")
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
 	var (
 		parameter1 = "parameter1"
@@ -44,13 +57,17 @@ func TestParseMessageWithParameters(t *testing.T) {
 		},
 	}
 
-	if !reflect.DeepEqual(actual, expected) {
+	if !reflect.DeepEqual(*actual, expected) {
 		t.Fail()
 	}
 }
 
 func TestParseMessageWithTrailingParameter(t *testing.T) {
-	actual := parseMessage("command1234 parameter1 :parameter2 with spaces")
+	actual, err := parseMessage("command1234 parameter1 :parameter2 with spaces")
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
 	var (
 		parameter1 = "parameter1"
@@ -64,7 +81,7 @@ func TestParseMessageWithTrailingParameter(t *testing.T) {
 		},
 	}
 
-	if !reflect.DeepEqual(actual, expected) {
+	if !reflect.DeepEqual(*actual, expected) {
 		t.Fail()
 	}
 }

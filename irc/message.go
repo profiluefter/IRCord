@@ -2,6 +2,7 @@ package irc
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 )
 
@@ -11,9 +12,13 @@ type message struct {
 	parameters [15]*string
 }
 
-func parseMessage(line string) message {
+func parseMessage(line string) (*message, error) {
 	lineSplit := strings.Split(line, " ")
 	lineSplitIndex := 0
+
+	if len(lineSplit) <= 0 {
+		return nil, errors.New("invalid message")
+	}
 
 	var prefix *string
 	var command string
@@ -56,11 +61,12 @@ func parseMessage(line string) message {
 		}
 	}
 
-	return message{
+	m := message{
 		prefix:     prefix,
 		command:    command,
 		parameters: parameters,
 	}
+	return &m, nil
 }
 
 func (message message) serialize() string {

@@ -5,15 +5,15 @@ import (
 	"strings"
 )
 
-type messageHandler func(*client, message) error
+type messageHandler func(*client, *message) error
 
-var notFoundHandler messageHandler = func(c *client, m message) error {
+var notFoundHandler messageHandler = func(c *client, m *message) error {
 	fmt.Printf("Unknown command: %s\n", m.command)
 	return nil
 }
 
 var commands = map[string]messageHandler{
-	"PASS": func(c *client, m message) error {
+	"PASS": func(c *client, m *message) error {
 		if c.registered {
 			return c.sendNumeric(ERR_ALREADYREGISTRED, "Already registered")
 		}
@@ -23,7 +23,7 @@ var commands = map[string]messageHandler{
 		//currently there is no auth so all passwords are allowed
 		return nil
 	},
-	"NICK": func(c *client, m message) error {
+	"NICK": func(c *client, m *message) error {
 		if m.parameters[0] == nil {
 			return c.sendNumeric(ERR_NONICKNAMEGIVEN, "No nickname given")
 		}
@@ -52,7 +52,7 @@ var commands = map[string]messageHandler{
 
 		return c.sendNumeric(RPL_ENDOFMOTD, ":End of MOTD command")
 	},
-	"USER": func(c *client, m message) error {
+	"USER": func(c *client, m *message) error {
 		if c.registered {
 			return c.sendNumeric(ERR_ALREADYREGISTRED, "Already registered")
 		}
@@ -61,7 +61,7 @@ var commands = map[string]messageHandler{
 		}
 		return c.sendNumeric(ERR_USERSDISABLED, "Users are not implemented")
 	},
-	"QUIT": func(c *client, m message) error {
+	"QUIT": func(c *client, m *message) error {
 		c.connection.Close()
 		return nil
 	},

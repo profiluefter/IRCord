@@ -45,17 +45,17 @@ func (client *client) handle() {
 	}
 }
 
-func (client *client) recvMessage() (message, error) {
+func (client *client) recvMessage() (*message, error) {
 	reader := bufio.NewScanner(client.connection)
 	reader.Scan()
 
 	if reader.Err() != nil {
-		return message{}, reader.Err()
+		return nil, reader.Err()
 	}
 
 	line := reader.Text()
-	message := parseMessage(line)
-	return message, nil
+	message, err := parseMessage(line)
+	return message, err
 }
 
 func (client *client) sendNumeric(numeric reply, reason string) error {
