@@ -5,14 +5,24 @@ import (
 	"strconv"
 )
 
-type Server struct {
+type ServerOptions struct {
 	Name string
 	Port uint16
 	Motd *string
 }
 
-func (server *Server) Start() error {
-	socket, err := net.Listen("tcp4", ":"+strconv.Itoa(int(server.Port)))
+func NewServer(options ServerOptions) *server {
+	server := new(server)
+	server.options = options
+	return server
+}
+
+type server struct {
+	options ServerOptions
+}
+
+func (server *server) Start() error {
+	socket, err := net.Listen("tcp4", ":"+strconv.Itoa(int(server.options.Port)))
 	if err != nil {
 		return err
 	}

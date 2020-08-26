@@ -12,7 +12,7 @@ const connectionClosedByServer = "use of closed network connection"
 
 type client struct {
 	connection net.Conn
-	server     *Server
+	server     *server
 	registered bool
 	nickname   *string
 	//mode     int8
@@ -66,7 +66,7 @@ func (client *client) sendNumeric(numeric reply, reason string) error {
 	}
 
 	return client.sendMessage(message{
-		prefix:     &client.server.Name,
+		prefix:     &client.server.options.Name,
 		command:    fmt.Sprintf("%03d", numeric),
 		parameters: [15]*string{target, &reason},
 	})

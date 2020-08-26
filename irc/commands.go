@@ -31,11 +31,11 @@ var commands = map[string]messageHandler{
 		c.registered = true
 
 		var errors [5]error
-		errors[0] = c.sendNumeric(RPL_WELCOME, fmt.Sprintf("Welcome to the Internet Relay Network %s!%s@%s", *c.nickname, *c.nickname, c.server.Name))
-		errors[1] = c.sendNumeric(RPL_YOURHOST, fmt.Sprintf("Your host is %s, running version git", c.server.Name))
+		errors[0] = c.sendNumeric(RPL_WELCOME, fmt.Sprintf("Welcome to the Internet Relay Network %s!%s@%s", *c.nickname, *c.nickname, c.server.options.Name))
+		errors[1] = c.sendNumeric(RPL_YOURHOST, fmt.Sprintf("Your host is %s, running version git", c.server.options.Name))
 		errors[2] = c.sendNumeric(RPL_CREATED, "This server was created sometime")
-		errors[3] = c.sendNumeric(RPL_MYINFO, fmt.Sprintf("%s git", c.server.Name))
-		errors[4] = c.sendNumeric(RPL_MOTDSTART, fmt.Sprintf(":- %s Message of the day - ", c.server.Name))
+		errors[3] = c.sendNumeric(RPL_MYINFO, fmt.Sprintf("%s git", c.server.options.Name))
+		errors[4] = c.sendNumeric(RPL_MOTDSTART, fmt.Sprintf(":- %s Message of the day - ", c.server.options.Name))
 
 		for _, err := range errors {
 			if err != nil {
@@ -43,7 +43,7 @@ var commands = map[string]messageHandler{
 			}
 		}
 
-		for _, line := range strings.Split(*c.server.Motd, "\n") {
+		for _, line := range strings.Split(*c.server.options.Motd, "\n") {
 			err := c.sendNumeric(RPL_MOTD, fmt.Sprintf(":- %s", line))
 			if err != nil {
 				return err
