@@ -7,6 +7,7 @@ const (
 	ERR_USERSDISABLED    reply = 446
 	ERR_ALREADYREGISTRED reply = 462
 	ERR_NONICKNAMEGIVEN  reply = 431
+	ERR_NOORIGIN         reply = 409
 
 	RPL_WELCOME  reply = 1
 	RPL_YOURHOST reply = 2

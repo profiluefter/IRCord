@@ -65,4 +65,18 @@ var commands = map[string]messageHandler{
 		c.connection.Close()
 		return nil
 	},
+	"PING": func(c *client, m *message) error {
+		if m.parameters[0] == nil {
+			return c.sendNumeric(ERR_NOORIGIN, "Not enough parameters")
+		}
+		var pong = message{
+			prefix:  &c.server.options.Name,
+			command: "PONG",
+			parameters: [15]*string{
+				&c.server.options.Name,
+				m.parameters[0],
+			},
+		}
+		return c.sendMessage(pong)
+	},
 }
