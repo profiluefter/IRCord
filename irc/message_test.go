@@ -123,7 +123,7 @@ func TestSerializeWithParameters(t *testing.T) {
 		},
 	}.serialize()
 
-	expected := "test param1 param2"
+	expected := "test param1 :param2"
 
 	if actual != expected {
 		t.Fatalf("%s != %s", actual, expected)

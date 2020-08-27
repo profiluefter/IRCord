@@ -80,14 +80,12 @@ func (message message) serialize() string {
 
 	buffer.WriteString(message.command)
 
-	for _, parameter := range message.parameters {
-		if parameter != nil {
-			buffer.WriteRune(' ')
-			buffer.WriteString(*parameter)
-		} else {
-			//This shouldn't happen anymore but better be save
-			break
+	for index, parameter := range message.parameters {
+		buffer.WriteRune(' ')
+		if index+1 == len(message.parameters) {
+			buffer.WriteRune(':')
 		}
+		buffer.WriteString(*parameter)
 	}
 
 	return buffer.String()
