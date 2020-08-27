@@ -58,17 +58,22 @@ func (client *client) recvMessage() (*message, error) {
 	return message, err
 }
 
-func (client *client) sendNumeric(numeric reply, reason string) error {
+func (client *client) sendNumeric(numeric reply, parameters ...string) error {
 	var target = client.nickname
 	if target == nil {
 		target = new(string)
 		*target = "*"
 	}
 
+	var messageParameters = []*string{target}
+	for _, parameter := range parameters {
+		parameter := parameter
+		messageParameters = append(messageParameters, &parameter)
+	}
 	return client.sendMessage(message{
 		prefix:     &client.server.options.Name,
 		command:    fmt.Sprintf("%03d", numeric),
-		parameters: []*string{target, &reason},
+		parameters: messageParameters,
 	})
 }
 

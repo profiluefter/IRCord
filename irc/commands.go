@@ -2,6 +2,7 @@ package irc
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -9,7 +10,7 @@ type messageHandler func(*client, *message) error
 
 var notFoundHandler messageHandler = func(c *client, m *message) error {
 	fmt.Printf("Unknown command: %s\n", m.command)
-	return c.sendNumeric(ERR_UNKNOWNCOMMAND, fmt.Sprintf("%s :Unknown command", m.command))
+	return c.sendNumeric(ERR_UNKNOWNCOMMAND, m.command, "Unknown command")
 }
 
 var commands = map[string]messageHandler{
@@ -35,7 +36,7 @@ var commands = map[string]messageHandler{
 		errors[1] = c.sendNumeric(RPL_YOURHOST, fmt.Sprintf("Your host is %s, running version git", c.server.options.Name))
 		errors[2] = c.sendNumeric(RPL_CREATED, "This server was created sometime")
 		errors[3] = c.sendNumeric(RPL_MYINFO, fmt.Sprintf("%s git", c.server.options.Name))
-		errors[4] = c.sendNumeric(RPL_MOTDSTART, fmt.Sprintf(":- %s Message of the day - ", c.server.options.Name))
+		errors[4] = c.sendNumeric(RPL_MOTDSTART, fmt.Sprintf("- %s Message of the day - ", c.server.options.Name))
 
 		for _, err := range errors {
 			if err != nil {
@@ -44,13 +45,13 @@ var commands = map[string]messageHandler{
 		}
 
 		for _, line := range strings.Split(*c.server.options.Motd, "\n") {
-			err := c.sendNumeric(RPL_MOTD, fmt.Sprintf(":- %s", line))
+			err := c.sendNumeric(RPL_MOTD, fmt.Sprintf("- %s", line))
 			if err != nil {
 				return err
 			}
 		}
 
-		return c.sendNumeric(RPL_ENDOFMOTD, ":End of MOTD command")
+		return c.sendNumeric(RPL_ENDOFMOTD, "End of MOTD command")
 	},
 	"USER": func(c *client, m *message) error {
 		if c.registered {
@@ -96,7 +97,7 @@ var commands = map[string]messageHandler{
 					return err
 				}
 			} else {
-				err := c.sendNumeric(ERR_NOSUCHCHANNEL, fmt.Sprintf("%s :No such channel", name))
+				err := c.sendNumeric(ERR_NOSUCHCHANNEL, name, "No such channel")
 				if err != nil {
 					return err
 				}
@@ -106,14 +107,14 @@ var commands = map[string]messageHandler{
 	},
 	"PRIVMSG": func(c *client, m *message) error {
 		if len(m.parameters) == 0 {
-			return c.sendNumeric(ERR_NORECIPIENT, ":No recipient given (PRIVMSG)")
+			return c.sendNumeric(ERR_NORECIPIENT, "No recipient given (PRIVMSG)")
 		}
 		if len(m.parameters) == 1 {
-			return c.sendNumeric(ERR_NOTEXTTOSEND, ":No text to send")
+			return c.sendNumeric(ERR_NOTEXTTOSEND, "No text to send")
 		}
 		channel := c.server.channels[*m.parameters[0]]
 		if channel == nil {
-			return c.sendNumeric(ERR_NOSUCHNICK, fmt.Sprintf("%s :No such nick/channel", *m.parameters[0]))
+			return c.sendNumeric(ERR_NOSUCHNICK, *m.parameters[0], "No such nick/channel")
 		}
 		channel.clientSentMessage(*c.nickname, *m.parameters[1])
 		return nil
