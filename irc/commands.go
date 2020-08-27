@@ -119,4 +119,45 @@ var commands = map[string]messageHandler{
 		channel.clientSentMessage(*c.nickname, *m.parameters[1])
 		return nil
 	},
+	"LIST": func(c *client, m *message) error {
+		if len(m.parameters) == 2 && *m.parameters[1] != c.server.options.Name {
+			return c.sendNumeric(ERR_NOSUCHSERVER, *m.parameters[1], "No such server")
+		}
+
+		//TODO: Replace hardcoded +100 with a variable that can be set by the library user
+		//      This is currently necessary because channels with 0 users don't show up in most IRC clients
+		if len(m.parameters) == 1 {
+			requestedChannels := strings.Split(*m.parameters[0], ",")
+			for _, requestedChannel := range requestedChannels {
+				channel := c.server.channels[requestedChannel]
+				if channel != nil {
+					topic := channel.topic
+					if topic == "" {
+						topic = "No topic is set"
+					}
+					err := c.sendNumeric(RPL_LIST, requestedChannel, strconv.Itoa(len(channel.subscriber)+100), topic)
+					if err != nil {
+						return err
+					}
+				} else {
+					err := c.sendNumeric(ERR_NOSUCHNICK, requestedChannel, "No such nick/channel")
+					if err != nil {
+						return err
+					}
+				}
+			}
+		} else {
+			for _, channel := range c.server.channels {
+				topic := channel.topic
+				if topic == "" {
+					topic = "No topic is set"
+				}
+				err := c.sendNumeric(RPL_LIST, channel.Name, strconv.Itoa(len(channel.subscriber)+100), topic)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return c.sendNumeric(RPL_LISTEND, "End of LIST")
+	},
 }

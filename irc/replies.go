@@ -13,6 +13,7 @@ const (
 	ERR_NOTEXTTOSEND     reply = 412
 	ERR_NOSUCHNICK       reply = 401
 	ERR_UNKNOWNCOMMAND   reply = 421
+	ERR_NOSUCHSERVER     reply = 402
 
 	RPL_WELCOME  reply = 1
 	RPL_YOURHOST reply = 2
@@ -22,4 +23,7 @@ const (
 	RPL_MOTDSTART reply = 375
 	RPL_MOTD      reply = 372
 	RPL_ENDOFMOTD reply = 376
+
+	RPL_LIST    reply = 322
+	RPL_LISTEND reply = 323
 )
