@@ -19,20 +19,24 @@ func newChannel(name string) *channel {
 }
 
 func (channel *channel) SendMessage(sender string, content string) {
+	channel.broadcastMessage(&sender, message{
+		prefix:  &sender,
+		command: "PRIVMSG",
+		parameters: []*string{
+			&channel.name,
+			&content,
+		},
+	})
+}
+
+func (channel *channel) broadcastMessage(sender *string, message message) {
 	for _, subscriber := range channel.subscriber {
-		if *subscriber.nickname == sender {
+		if sender != nil && *subscriber.nickname == *sender {
 			continue
 		}
 		subscriber := subscriber
 		go func() {
-			_ = subscriber.sendMessage(message{
-				prefix:  &sender,
-				command: "PRIVMSG",
-				parameters: []*string{
-					&channel.name,
-					&content,
-				},
-			})
+			_ = subscriber.sendMessage(message)
 		}()
 	}
 }
@@ -54,16 +58,15 @@ func (channel *channel) worker() {
 }
 
 func (channel *channel) join(c *client) error {
-	err := c.sendMessage(message{
+	channel.subscriber = append(channel.subscriber, c)
+
+	channel.broadcastMessage(nil, message{
 		prefix:     c.nickname,
 		command:    "JOIN",
 		parameters: []*string{&channel.name},
 	})
-	if err != nil {
-		return err
-	}
+	//TODO: Additional replies
 
-	channel.subscriber = append(channel.subscriber, c)
 	return nil
 }
 
