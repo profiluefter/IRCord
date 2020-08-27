@@ -12,6 +12,7 @@ const (
 	ERR_NORECIPIENT      reply = 411
 	ERR_NOTEXTTOSEND     reply = 412
 	ERR_NOSUCHNICK       reply = 401
+	ERR_UNKNOWNCOMMAND   reply = 421
 
 	RPL_WELCOME  reply = 1
 	RPL_YOURHOST reply = 2

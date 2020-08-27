@@ -9,7 +9,7 @@ type messageHandler func(*client, *message) error
 
 var notFoundHandler messageHandler = func(c *client, m *message) error {
 	fmt.Printf("Unknown command: %s\n", m.command)
-	return nil
+	return c.sendNumeric(ERR_UNKNOWNCOMMAND, fmt.Sprintf("%s :Unknown command", m.command))
 }
 
 var commands = map[string]messageHandler{
