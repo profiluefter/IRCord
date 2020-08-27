@@ -75,7 +75,19 @@ func (channel *Channel) join(c *client) error {
 	return nil
 }
 
-func (channel *channel) clientSentMessage(nickname string, content string) {
+func (channel *Channel) part(c *client) error {
+	channel.subscriber = removeHolyShitWhyIsThisNotABuiltinLikeAppendAndWhyIsItSoUgly(channel.subscriber, c)
+
+	channel.broadcastMessage(nil, message{
+		prefix:     c.nickname,
+		command:    "PART",
+		parameters: []*string{&channel.Name},
+	})
+
+	return nil
+}
+
+func (channel *Channel) clientSentMessage(nickname string, content string) {
 	channel.sendEvent(MessageReceivedEvent{
 		Nickname: nickname,
 		Content:  content,
@@ -91,4 +103,19 @@ func createLoopbackListener(channel *Channel) *EventListener {
 		channel.SendMessage(event.Nickname, event.Content)
 	}
 	return (*EventListener)(&f)
+}
+
+func removeHolyShitWhyIsThisNotABuiltinLikeAppendAndWhyIsItSoUgly(slice []*client, toRemove *client) []*client {
+	var index = -1
+	for i, element := range slice {
+		if element == toRemove {
+			index = i
+		}
+	}
+	if index == -1 {
+		panic("couldn't find element")
+	}
+
+	slice[index] = slice[len(slice)-1]
+	return slice[:len(slice)-1]
 }
