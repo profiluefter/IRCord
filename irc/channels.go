@@ -1,35 +1,40 @@
 package irc
 
-type channel struct {
-	name           string
+//never construct this yourself
+type Channel struct {
+	Name           string
+	topic          string
 	listeners      []*EventListener
 	incomingEvents chan Event
 	subscriber     []*client
 }
 
-func newChannel(name string) *channel {
-	c := new(channel)
-	c.name = name
-	c.listeners = []*EventListener{createLoopbackListener(c)}
-	c.incomingEvents = make(chan Event)
-	c.subscriber = []*client{}
+func newChannel(name string, topic string) *Channel {
+	c := &Channel{
+		Name:           name,
+		topic:          topic,
+		listeners:      []*EventListener{},
+		incomingEvents: make(chan Event),
+		subscriber:     []*client{},
+	}
+	c.AddListener(createLoopbackListener(c))
 
 	go c.worker()
 	return c
 }
 
-func (channel *channel) SendMessage(sender string, content string) {
+func (channel *Channel) SendMessage(sender string, content string) {
 	channel.broadcastMessage(&sender, message{
 		prefix:  &sender,
 		command: "PRIVMSG",
 		parameters: []*string{
-			&channel.name,
+			&channel.Name,
 			&content,
 		},
 	})
 }
 
-func (channel *channel) broadcastMessage(sender *string, message message) {
+func (channel *Channel) broadcastMessage(sender *string, message message) {
 	for _, subscriber := range channel.subscriber {
 		if sender != nil && *subscriber.nickname == *sender {
 			continue
@@ -41,15 +46,15 @@ func (channel *channel) broadcastMessage(sender *string, message message) {
 	}
 }
 
-func (channel *channel) AddListener(listener *EventListener) {
+func (channel *Channel) AddListener(listener *EventListener) {
 	channel.listeners = append(channel.listeners, listener)
 }
 
-func (channel *channel) sendEvent(event Event) {
+func (channel *Channel) sendEvent(event Event) {
 	channel.incomingEvents <- event
 }
 
-func (channel *channel) worker() {
+func (channel *Channel) worker() {
 	for event := range channel.incomingEvents {
 		for _, listener := range channel.listeners {
 			go (*listener)(event)
@@ -57,13 +62,13 @@ func (channel *channel) worker() {
 	}
 }
 
-func (channel *channel) join(c *client) error {
+func (channel *Channel) join(c *client) error {
 	channel.subscriber = append(channel.subscriber, c)
 
 	channel.broadcastMessage(nil, message{
 		prefix:     c.nickname,
 		command:    "JOIN",
-		parameters: []*string{&channel.name},
+		parameters: []*string{&channel.Name},
 	})
 	//TODO: Additional replies
 
@@ -77,7 +82,7 @@ func (channel *channel) clientSentMessage(nickname string, content string) {
 	})
 }
 
-func createLoopbackListener(channel *channel) *EventListener {
+func createLoopbackListener(channel *Channel) *EventListener {
 	f := func(e Event) {
 		event, ok := e.(MessageReceivedEvent)
 		if !ok {

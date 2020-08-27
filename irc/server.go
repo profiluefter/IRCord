@@ -15,13 +15,13 @@ type ServerOptions struct {
 func NewServer(options ServerOptions) *server {
 	server := new(server)
 	server.options = options
-	server.channels = map[string]*channel{}
+	server.channels = map[string]*Channel{}
 	return server
 }
 
 type server struct {
 	options  ServerOptions
-	channels map[string]*channel
+	channels map[string]*Channel
 }
 
 func (server *server) Start() error {
@@ -48,8 +48,8 @@ func (server *server) Start() error {
 	}
 }
 
-func (server *server) NewChannel(name string) *channel {
-	channel := newChannel(name)
+func (server *server) NewChannel(name string, topic string) *Channel {
+	channel := newChannel(name, topic)
 
 	server.channels[name] = channel
 	return channel
