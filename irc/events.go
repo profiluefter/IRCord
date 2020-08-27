@@ -1,10 +1,10 @@
 package irc
 
-type event interface{}
+type Event interface{}
 
-type messageReceivedEvent struct {
-	nickname string
-	content  string
+type MessageReceivedEvent struct {
+	Nickname string
+	Content  string
 }
 
-type EventListener func(event)
+type EventListener func(Event)

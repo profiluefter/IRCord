@@ -3,7 +3,7 @@ package irc
 type channel struct {
 	name           string
 	listeners      []*EventListener
-	incomingEvents chan event
+	incomingEvents chan Event
 	subscriber     []*client
 }
 
@@ -11,7 +11,7 @@ func newChannel(name string) *channel {
 	c := new(channel)
 	c.name = name
 	c.listeners = []*EventListener{createLoopbackListener(c)}
-	c.incomingEvents = make(chan event)
+	c.incomingEvents = make(chan Event)
 	c.subscriber = []*client{}
 
 	go c.worker()
@@ -41,7 +41,7 @@ func (channel *channel) AddListener(listener *EventListener) {
 	channel.listeners = append(channel.listeners, listener)
 }
 
-func (channel *channel) sendEvent(event event) {
+func (channel *channel) sendEvent(event Event) {
 	channel.incomingEvents <- event
 }
 
@@ -68,19 +68,19 @@ func (channel *channel) join(c *client) error {
 }
 
 func (channel *channel) clientSentMessage(nickname string, content string) {
-	channel.sendEvent(messageReceivedEvent{
-		nickname: nickname,
-		content:  content,
+	channel.sendEvent(MessageReceivedEvent{
+		Nickname: nickname,
+		Content:  content,
 	})
 }
 
 func createLoopbackListener(channel *channel) *EventListener {
-	f := func(e event) {
-		event, ok := e.(messageReceivedEvent)
+	f := func(e Event) {
+		event, ok := e.(MessageReceivedEvent)
 		if !ok {
 			return
 		}
-		channel.SendMessage(event.nickname, event.content)
+		channel.SendMessage(event.Nickname, event.Content)
 	}
 	return (*EventListener)(&f)
 }

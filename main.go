@@ -15,7 +15,12 @@ func main() {
 	}
 	server := irc.NewServer(options)
 
-	server.NewChannel("#testing")
+	channel := server.NewChannel("#testing")
+	listener := func(event irc.Event) {
+		mre := event.(irc.MessageReceivedEvent)
+		fmt.Printf("%s: %s\n", mre.Nickname, mre.Content)
+	}
+	channel.AddListener((*irc.EventListener)(&listener))
 
 	err := server.Start()
 	if err != nil {
