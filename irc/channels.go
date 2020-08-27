@@ -10,16 +10,23 @@ type channel struct {
 func newChannel(name string) *channel {
 	c := new(channel)
 	c.name = name
+	c.listeners = []*EventListener{createLoopbackListener(c)}
+	c.incomingEvents = make(chan event)
+	c.subscriber = []*client{}
+
+	go c.worker()
 	return c
 }
 
 func (channel *channel) SendMessage(sender string, content string) {
-	prefix := ":" + sender
 	for _, subscriber := range channel.subscriber {
+		if *subscriber.nickname == sender {
+			continue
+		}
 		subscriber := subscriber
 		go func() {
 			_ = subscriber.sendMessage(message{
-				prefix:  &prefix,
+				prefix:  &sender,
 				command: "PRIVMSG",
 				parameters: []*string{
 					&channel.name,
@@ -44,4 +51,36 @@ func (channel *channel) worker() {
 			go (*listener)(event)
 		}
 	}
+}
+
+func (channel *channel) join(c *client) error {
+	err := c.sendMessage(message{
+		prefix:     c.nickname,
+		command:    "JOIN",
+		parameters: []*string{&channel.name},
+	})
+	if err != nil {
+		return err
+	}
+
+	channel.subscriber = append(channel.subscriber, c)
+	return nil
+}
+
+func (channel *channel) clientSentMessage(nickname string, content string) {
+	channel.sendEvent(messageReceivedEvent{
+		nickname: nickname,
+		content:  content,
+	})
+}
+
+func createLoopbackListener(channel *channel) *EventListener {
+	f := func(e event) {
+		event, ok := e.(messageReceivedEvent)
+		if !ok {
+			return
+		}
+		channel.SendMessage(event.nickname, event.content)
+	}
+	return (*EventListener)(&f)
 }

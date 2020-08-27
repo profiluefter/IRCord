@@ -69,14 +69,53 @@ var commands = map[string]messageHandler{
 		if len(m.parameters) < 1 {
 			return c.sendNumeric(ERR_NOORIGIN, "Not enough parameters")
 		}
-		var pong = message{
+		return c.sendMessage(message{
 			prefix:  &c.server.options.Name,
 			command: "PONG",
 			parameters: []*string{
 				&c.server.options.Name,
 				m.parameters[0],
 			},
+		})
+	},
+	"JOIN": func(c *client, m *message) error {
+		if len(m.parameters) < 1 {
+			return c.sendNumeric(ERR_NEEDMOREPARAMS, "No channels given")
 		}
-		return c.sendMessage(pong)
+		if *m.parameters[0] == "0" {
+			//TODO: Unsubscribe from all
+			return nil
+		}
+
+		channelList := strings.Split(*m.parameters[0], ",")
+		for _, name := range channelList {
+			channel := c.server.channels[name]
+			if channel != nil {
+				err := channel.join(c)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := c.sendNumeric(ERR_NOSUCHCHANNEL, fmt.Sprintf("%s :No such channel", name))
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	},
+	"PRIVMSG": func(c *client, m *message) error {
+		if len(m.parameters) == 0 {
+			return c.sendNumeric(ERR_NORECIPIENT, ":No recipient given (PRIVMSG)")
+		}
+		if len(m.parameters) == 1 {
+			return c.sendNumeric(ERR_NOTEXTTOSEND, ":No text to send")
+		}
+		channel := c.server.channels[*m.parameters[0]]
+		if channel == nil {
+			return c.sendNumeric(ERR_NOSUCHNICK, fmt.Sprintf("%s :No such nick/channel", *m.parameters[0]))
+		}
+		channel.clientSentMessage(*c.nickname, *m.parameters[1])
+		return nil
 	},
 }

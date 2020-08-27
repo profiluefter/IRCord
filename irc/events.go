@@ -1,17 +1,10 @@
 package irc
 
-type eventType int
-
-const (
-	messageReceived eventType = iota
-)
-
-type event interface {
-	eventType() eventType
-}
+type event interface{}
 
 type messageReceivedEvent struct {
-	content string
+	nickname string
+	content  string
 }
 
 type EventListener func(event)
